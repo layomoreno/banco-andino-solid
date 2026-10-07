@@ -11,11 +11,16 @@ public class Main {
         TransaccionService servicio = new TransaccionService(
             List.of(new ReglaMontoPositivo(), new ReglaTopeDiario(5_000_000)),
             new CalculadorComisionPorTipo(List.of(
-                new ComisionMismoBanco(), new ComisionOtroBanco(), new ComisionInternacional())),
-            new OracleRepositorio(),
+                new ComisionMismoBanco(), new ComisionOtroBanco(), new ComisionInternacional(),
+                new ComisionLlave())),
+            new PostgresRepositorio(),   // para devolverse durante la migración: new OracleRepositorio(),
             new ComprobanteConsola(),
-            new NotificadorSms(new SmsGateway()),
-            new AuditoriaConsola());
+            new NotificadorCompuesto(List.of(
+                new NotificadorSms(new SmsGateway()),
+                new NotificadorPush(new PushGateway()))),
+            new AuditoriaCompuesta(List.of(
+                new AuditoriaConsola(),
+                new AuditoriaAntifraude())));
 
         servicio.transferir(ana, luis, 150_000, "OTRO_BANCO");
 
